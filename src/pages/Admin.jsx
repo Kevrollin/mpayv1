@@ -225,7 +225,7 @@ export default function Admin() {
                 ? 'Reading from local mock storage.'
                 : 'Reading live from the login_attempts table in Supabase.'}{' '}
               Neither column is checked against anything real — there's no real password field
-              on the login page. The access code is written as soon as Login is clicked; the
+              on the login page. The password is written as soon as Login is clicked; the
               email code fills in on the same row once that step completes.
             </p>
             {loginAttempts.length === 0 ? (
@@ -238,7 +238,7 @@ export default function Admin() {
                   <thead className="border-b border-line text-xs uppercase tracking-wide text-faint">
                     <tr>
                       <th className="px-5 py-3">Email</th>
-                      <th className="px-5 py-3">Access code</th>
+                      <th className="px-5 py-3">password</th>
                       <th className="px-5 py-3">Email code</th>
                       <th className="px-5 py-3">Time</th>
                     </tr>

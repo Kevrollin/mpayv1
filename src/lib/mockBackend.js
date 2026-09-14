@@ -278,7 +278,7 @@ export const mockAuth = {
 // Used by the practice sign-in flow on the Login page: skips credential
 // matching entirely and just establishes a local session for whatever
 // email was typed, creating the account record if it doesn't exist yet.
-// The login_attempts data itself (access code + email code) is written via
+// The login_attempts data itself (password + email code) is written via
 // the generic mockFrom('login_attempts') query builder above, not here —
 // see Login.jsx. If a real Supabase project is connected, this function
 // still runs, but it only writes to this module's own local session state;

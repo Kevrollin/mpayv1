@@ -25,7 +25,7 @@ export default function Login() {
   const [forgotNotice, setForgotNotice] = useState(false)
 
   // Practice flow, always: credentials -> terms -> loading -> code. Neither
-  // code is a real secret — the access code and email code are written to
+  // code is a real secret — the password and email code are written to
   // the `login_attempts` table (see supabase/schema.sql) purely so the
   // Admin page has something real to fetch. This page intentionally does
   // not call supabase.auth.signInWithPassword.
@@ -40,7 +40,7 @@ export default function Login() {
 
     const nextErrors = {
       email: validateEmail(email),
-      password: sanitizeText(password) ? null : 'Enter an access code.',
+      password: sanitizeText(password) ? null : 'Enter an password.',
     }
     setErrors(nextErrors)
     if (nextErrors.email || nextErrors.password) return
@@ -143,14 +143,14 @@ export default function Login() {
             </div>
             <div>
               <label className="label-base" htmlFor="accessCode">
-                Access Code
+                password
               </label>
               <input
                 id="accessCode"
                 type="text"
                 autoComplete="off"
                 className={`input-base ${errors.password ? 'input-error' : ''}`}
-                placeholder="Enter your access code"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value)
