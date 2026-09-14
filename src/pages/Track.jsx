@@ -66,7 +66,7 @@ export default function Track() {
 
   return (
     <div className="mx-auto max-w-xl px-4 py-16 sm:px-6">
-      <Logo size="md" showText={false} className="mb-8 justify-center" />
+      <Logo size="compact" showText={false} className="mb-8 justify-center" />
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-ink">Track a payment</h1>
         <p className="mt-2 text-sm text-muted">

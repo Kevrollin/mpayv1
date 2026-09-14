@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+import { useTheme } from '../context/ThemeContext'
 import Alert from '../components/Alert'
 import Logo from '../components/Logo'
 import SocialAuthRow from '../components/SocialAuthRow'
@@ -8,6 +9,8 @@ import { sanitizeText, validateEmail, validatePassword } from '../lib/validation
 
 export default function Signup() {
   const navigate = useNavigate()
+  const { theme } = useTheme()
+  const isLight = theme === 'light'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -70,7 +73,7 @@ export default function Signup() {
   return (
     <div className="mx-auto max-w-md px-4 py-20 sm:px-6">
       <div className="card p-6 sm:p-8">
-        <Logo className="mb-6 justify-center" showText={false} />
+        <Logo size="compact" className="mb-6 justify-center" showText={false} />
 
         <h1 className="text-left text-2xl font-bold text-ink">Register</h1>
         <p className="mt-1 mb-6 text-sm text-muted">
@@ -141,7 +144,13 @@ export default function Signup() {
             {errors.password && <p className="error-text">{errors.password}</p>}
           </div>
 
-          <button type="submit" className="btn-primary w-full !py-3" disabled={submitting}>
+          <button
+            type="submit"
+            className={`w-full !py-3 ${
+              isLight ? 'btn-primary !bg-navy-950 !text-accent-500 hover:!bg-navy-800' : 'btn-primary'
+            }`}
+            disabled={submitting}
+          >
             {submitting ? 'Creating account…' : 'Register'}
           </button>
         </form>

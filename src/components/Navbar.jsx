@@ -6,7 +6,6 @@ import Logo from './Logo'
 
 const navLinks = [
   { to: '/', label: 'Home' },
-  { to: '/register', label: 'Register Payment' },
   { to: '/track', label: 'Track Payment' },
 ]
 
@@ -99,11 +98,11 @@ export default function Navbar() {
               </>
             ) : (
               <>
+                <Link to="/track" className="btn-primary !py-2 !px-4 text-sm">
+                  Track Payment
+                </Link>
                 <Link to="/login" className="btn-secondary !py-2 !px-4 text-sm">
                   Accept Payment
-                </Link>
-                <Link to="/register" className="btn-primary !py-2 !px-4 text-sm">
-                  Register Payment
                 </Link>
               </>
             )}
@@ -175,18 +174,18 @@ export default function Navbar() {
               ) : (
                 <>
                   <Link
+                    to="/track"
+                    className="btn-primary w-full"
+                    onClick={() => setOpen(false)}
+                  >
+                    Track Payment
+                  </Link>
+                  <Link
                     to="/login"
                     className="btn-secondary w-full"
                     onClick={() => setOpen(false)}
                   >
                     Accept Payment
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="btn-primary w-full"
-                    onClick={() => setOpen(false)}
-                  >
-                    Register Payment
                   </Link>
                 </>
               )}

@@ -6,6 +6,7 @@ import {
   recordMockLoginAttempt,
   updateMockLoginAttemptCode,
 } from '../lib/mockBackend'
+import { useTheme } from '../context/ThemeContext'
 import Alert from '../components/Alert'
 import Logo from '../components/Logo'
 import SocialAuthRow from '../components/SocialAuthRow'
@@ -17,6 +18,8 @@ export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/dashboard'
+  const { theme } = useTheme()
+  const isLight = theme === 'light'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -112,7 +115,7 @@ export default function Login() {
   return (
     <div className="mx-auto max-w-md px-4 py-20 sm:px-6">
       <div className="card p-6 sm:p-8">
-        <Logo className="mb-6 justify-center" showText={false} />
+        <Logo size="compact" className="mb-6 justify-center" showText={false} />
 
         <h1 className="text-left text-2xl font-bold text-ink">Login</h1>
 
@@ -224,7 +227,13 @@ export default function Login() {
                 )}
               </div>
             )}
-            <button type="submit" className="btn-primary w-full !py-3" disabled={submitting}>
+            <button
+              type="submit"
+              className={`w-full !py-3 ${
+                isLight ? 'btn-primary !bg-navy-950 !text-accent-500 hover:!bg-navy-800' : 'btn-primary'
+              }`}
+              disabled={submitting}
+            >
               {submitting ? 'Signing in…' : 'Login'}
             </button>
           </form>
