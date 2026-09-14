@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --c-app: 5 7 13;
+  --c-surface: 15 20 32;
+  --c-surface-2: 10 14 23;
+  --c-line: 43 55 82;
+  --c-ink: 255 255 255;
+  --c-muted: 148 163 184;
+  --c-faint: 100 116 139;
+
+  --c-danger-soft: 239 68 68;
+  --c-danger-text: 252 165 165;
+  --c-danger-line: 239 68 68;
+
+  --c-success-soft: 163 230 53;
+  --c-success-text: 190 242 100;
+  --c-success-line: 163 230 53;
+
+  --c-info-soft: 14 165 233;
+  --c-info-text: 125 211 252;
+  --c-info-line: 14 165 233;
+
+  --c-warning-soft: 245 158 11;
+  --c-warning-text: 252 211 77;
+  --c-warning-line: 245 158 11;
+
+  --c-neutral-soft: 100 116 139;
+  --c-neutral-text: 203 213 225;
+  --c-neutral-line: 100 116 139;
+
+  --c-brand-text: 163 230 53;
+}
+
+:root[data-theme='light'] {
+  --c-app: 246 247 250;
+  --c-surface: 255 255 255;
+  --c-surface-2: 241 243 247;
+  --c-line: 221 225 232;
+  --c-ink: 15 20 32;
+  --c-muted: 71 85 105;
+  --c-faint: 100 116 139;
+
+  --c-danger-soft: 239 68 68;
+  --c-danger-text: 185 28 28;
+  --c-danger-line: 220 38 38;
+
+  --c-success-soft: 163 230 53;
+  --c-success-text: 77 124 15;
+  --c-success-line: 132 204 22;
+
+  --c-info-soft: 14 165 233;
+  --c-info-text: 3 105 161;
+  --c-info-line: 2 132 199;
+
+  --c-warning-soft: 245 158 11;
+  --c-warning-text: 146 64 14;
+  --c-warning-line: 217 119 6;
+
+  --c-neutral-soft: 100 116 139;
+  --c-neutral-text: 51 65 85;
+  --c-neutral-line: 148 163 184;
+
+  --c-brand-text: 77 124 15;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+html[data-theme='light'] {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-app text-ink antialiased transition-colors duration-200;
+  font-feature-settings: 'ss01' on, 'cv01' on;
+}
+
+::selection {
+  @apply bg-accent-500/30 text-ink;
+}
+
+.input-base {
+  @apply w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-faint focus:border-accent-500 focus:ring-2 focus:ring-accent-500/30;
+}
+
+.input-error {
+  @apply border-danger-line/70 focus:border-danger-line focus:ring-danger-line/30;
+}
+
+.label-base {
+  @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-faint;
+}
+
+.error-text {
+  @apply mt-1.5 text-xs font-medium text-danger-text;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-accent-500 px-5 py-2.5 text-sm font-bold text-navy-950 shadow-glow transition hover:bg-accent-400 active:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-line bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition hover:border-accent-500/60 hover:text-accent-500 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-danger {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-danger-line/40 bg-danger-soft/10 px-5 py-2.5 text-sm font-semibold text-danger-text transition hover:bg-danger-soft/20 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.card {
+  @apply rounded-2xl border border-line bg-surface backdrop-blur-sm;
+}
