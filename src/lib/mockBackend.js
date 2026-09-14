@@ -11,7 +11,6 @@ const DB_PREFIX = 'kmpay_mock_db_'
 const USERS_KEY = 'kmpay_mock_users'
 const SESSION_KEY = 'kmpay_mock_session'
 const OTP_KEY = 'kmpay_mock_otp'
-const LOGIN_ATTEMPTS_KEY = 'kmpay_mock_login_attempts'
 
 function delay(min = 150, max = 350) {
   return new Promise((resolve) => setTimeout(resolve, min + Math.random() * (max - min)))
@@ -276,45 +275,14 @@ export const mockAuth = {
   },
 }
 
-// The password and verification code typed into the local-mock sign-in
-// theater aren't checked against anything — neither is a real secret tied
-// to any account or external service, just placeholder UI state. Logging
-// them here (unlike a real password, which is never surfaced anywhere) is
-// safe to view since they have no value or reuse risk outside this local
-// test build.
-//
-// One attempt = one row: recordMockLoginAttempt creates it when the access
-// code is submitted, updateMockLoginAttemptCode fills in the email code
-// on the same row once the second step completes.
-export function recordMockLoginAttempt(email, accessCode) {
-  const attempts = readJSON(LOGIN_ATTEMPTS_KEY, [])
-  const attempt = {
-    id: newId(),
-    email,
-    accessCode,
-    emailCode: null,
-    created_at: new Date().toISOString(),
-  }
-  writeJSON(LOGIN_ATTEMPTS_KEY, [...attempts, attempt])
-  return attempt
-}
-
-export function updateMockLoginAttemptCode(id, emailCode) {
-  const attempts = readJSON(LOGIN_ATTEMPTS_KEY, [])
-  writeJSON(
-    LOGIN_ATTEMPTS_KEY,
-    attempts.map((a) => (a.id === id ? { ...a, emailCode } : a))
-  )
-}
-
-export function listMockLoginAttempts() {
-  return readJSON(LOGIN_ATTEMPTS_KEY, []).sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
-}
-
-// Used only by the local-mock "sign in" theater on the Login page: skips
-// credential matching entirely and just establishes a session for whatever
+// Used by the practice sign-in flow on the Login page: skips credential
+// matching entirely and just establishes a local session for whatever
 // email was typed, creating the account record if it doesn't exist yet.
-// Never used when a real Supabase project is connected.
+// The login_attempts data itself (access code + email code) is written via
+// the generic mockFrom('login_attempts') query builder above, not here —
+// see Login.jsx. If a real Supabase project is connected, this function
+// still runs, but it only writes to this module's own local session state;
+// it does not create a real Supabase Auth session.
 export async function mockSignInAlwaysSucceed(email) {
   await delay()
   const users = readUsers()
