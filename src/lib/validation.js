@@ -37,12 +37,12 @@ export function validateAmount(value) {
 }
 
 export function validateCurrency(value) {
-  if (!isNonEmpty(value)) return 'Please select a currency.'
+  if (!isNonEmpty(value)) return 'Please enter a currency.'
   return null
 }
 
 export function validatePaymentMode(value) {
-  if (!isNonEmpty(value)) return 'Please select a payment mode.'
+  if (!isNonEmpty(value)) return 'Please enter a payment mode.'
   return null
 }
 

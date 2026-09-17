@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
-import { CURRENCIES, PAYMENT_MODES } from '../lib/currencies'
 import { generateTrackingCode } from '../lib/trackingCode'
 import Alert from '../components/Alert'
 import Logo from '../components/Logo'
@@ -19,8 +18,8 @@ const initialForm = {
   accountName: '',
   accountNumber: '',
   amount: '',
-  currency: 'USD',
-  paymentMode: 'bank_transfer',
+  currency: '',
+  paymentMode: '',
 }
 
 export default function Register() {
@@ -225,18 +224,14 @@ export default function Register() {
               <label className="label-base" htmlFor="currency">
                 Currency
               </label>
-              <select
+              <input
                 id="currency"
+                type="text"
                 className={`input-base ${errors.currency ? 'input-error' : ''}`}
+                placeholder="e.g. USD"
                 value={form.currency}
                 onChange={handleChange('currency')}
-              >
-                {CURRENCIES.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.code} — {c.name}
-                  </option>
-                ))}
-              </select>
+              />
               {errors.currency && <p className="error-text">{errors.currency}</p>}
             </div>
           </div>
@@ -245,18 +240,14 @@ export default function Register() {
             <label className="label-base" htmlFor="paymentMode">
               Payment mode
             </label>
-            <select
+            <input
               id="paymentMode"
+              type="text"
               className={`input-base ${errors.paymentMode ? 'input-error' : ''}`}
+              placeholder="e.g. Bank transfer"
               value={form.paymentMode}
               onChange={handleChange('paymentMode')}
-            >
-              {PAYMENT_MODES.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
+            />
             {errors.paymentMode && <p className="error-text">{errors.paymentMode}</p>}
           </div>
 
