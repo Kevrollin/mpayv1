@@ -153,7 +153,7 @@ export default function Track() {
               <p className="text-base font-bold text-slate-800">Receiver actions</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <Link
-                  to={`/checkout?code=${record.tracking_code}`}
+                  to="/login"
                   className="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
                 >
                   Accept Payment
