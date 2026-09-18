@@ -20,8 +20,8 @@ export function validateAccountName(value) {
 export function validateAccountNumber(value) {
   const v = sanitizeText(value)
   if (!v) return 'Account number is required.'
-  if (!/^[a-zA-Z0-9]{6,34}$/.test(v)) {
-    return 'Account number must be 6-34 alphanumeric characters.'
+  if (v.length < 6 || v.length > 34) {
+    return 'Account number must be 6-34 characters.'
   }
   return null
 }
@@ -63,8 +63,8 @@ export function validatePassword(value) {
 export function validateTrackingCode(value) {
   const v = sanitizeText(value).toUpperCase()
   if (!v) return 'Enter a tracking code.'
-  if (!/^TRX-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(v)) {
-    return 'Tracking code format looks like TRX-XXXX-XXXX.'
+  if (!/^TRX-\d{3}$/.test(v)) {
+    return 'Tracking code format looks like TRX-123.'
   }
   return null
 }

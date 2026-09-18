@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import Alert from '../components/Alert'
 import Logo from '../components/Logo'
-import StatusBadge from '../components/StatusBadge'
 import { validateTrackingCode } from '../lib/validation'
 
 export default function Track() {
@@ -22,7 +21,7 @@ export default function Track() {
     try {
       const { data, error: fetchError } = await supabase
         .from('payment_requests')
-        .select('id, account_name, amount, currency, payment_mode, tracking_code, status, created_at')
+        .select('id, account_name, account_number, amount, currency, payment_mode, tracking_code, status, created_at')
         .eq('tracking_code', trackingCode)
         .maybeSingle()
 
@@ -78,7 +77,7 @@ export default function Track() {
         <input
           type="text"
           className={`input-base sm:flex-1 ${inputError ? 'input-error' : ''}`}
-          placeholder="TRX-XXXX-XXXX"
+          placeholder="TRX-123"
           value={input}
           onChange={(e) => {
             setInput(e.target.value)
@@ -100,33 +99,71 @@ export default function Track() {
         )}
 
         {record && (
-          <div className="card p-6 sm:p-8">
-            <div className="flex items-center justify-between">
-              <p className="font-mono text-lg font-bold text-brand">{record.tracking_code}</p>
-              <StatusBadge status={record.status} />
+          <div className="overflow-hidden rounded-[22px] border border-slate-200 bg-white text-slate-900 shadow-xl shadow-slate-950/10">
+            <div className="bg-navy-950 px-6 py-6 text-white sm:px-8">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-3xl font-black tracking-tight">
+                    Bit<span className="text-rose-500">Valve</span>
+                  </p>
+                  <p className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-300">
+                    Escrow transaction
+                  </p>
+                </div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-600 bg-slate-800 text-amber-400">
+                  <span className="h-3.5 w-3.5 rounded-full bg-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.8)]" />
+                </div>
+              </div>
             </div>
-            <div className="mt-6 grid grid-cols-2 gap-5 text-sm">
-              <div>
-                <p className="text-faint">Account holder</p>
-                <p className="font-medium text-ink">{record.account_name}</p>
+
+            <div className="px-6 pb-7 pt-8 text-center sm:px-8">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
+                Total amount
+              </p>
+              <p className="mt-3 text-5xl font-black tracking-tight text-slate-950 sm:text-6xl">
+                {record.currency}{Number(record.amount).toFixed(2)}
+              </p>
+              <p className="mt-3 text-lg text-slate-500">Funds secured in escrow</p>
+            </div>
+
+            <div className="border-t border-slate-200 px-6 py-5 sm:px-8">
+              <ReceiptRow label="Transaction ID" value={record.tracking_code} strong />
+              <ReceiptRow label="Date" value={formatDate(record.created_at)} strong />
+              <ReceiptRow label="Time" value={formatTime(record.created_at)} strong />
+              <ReceiptRow label="Receiver" value={record.account_name} strong />
+              <ReceiptRow label="Account" value={record.account_number || 'Not provided'} strong />
+              <ReceiptRow label="Payment method" value={formatPaymentMode(record.payment_mode)} strong />
+              <ReceiptRow label="Amount" value={`${record.currency} ${Number(record.amount).toFixed(2)}`} strong />
+              <ReceiptRow label="Tax / VAT" value={`${record.currency}0.00`} strong last />
+            </div>
+
+            <div className="mx-6 mb-7 flex gap-4 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-5 text-left sm:mx-8">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-xl font-bold text-white">
+                ✓
               </div>
               <div>
-                <p className="text-faint">Amount</p>
-                <p className="font-medium text-ink">
-                  {record.amount} {record.currency}
+                <p className="font-bold text-emerald-800">Funds are in escrow</p>
+                <p className="mt-1 text-sm leading-relaxed text-slate-600">
+                  The payment has been submitted and is currently protected until the receiver takes action.
                 </p>
               </div>
-              <div>
-                <p className="text-faint">Payment mode</p>
-                <p className="font-medium capitalize text-ink">
-                  {record.payment_mode?.replaceAll('_', ' ')}
-                </p>
-              </div>
-              <div>
-                <p className="text-faint">Created</p>
-                <p className="font-medium text-ink">
-                  {new Date(record.created_at).toLocaleString()}
-                </p>
+            </div>
+
+            <div className="border-t border-slate-200 bg-slate-50 px-6 py-6 sm:px-8">
+              <p className="text-base font-bold text-slate-800">Receiver actions</p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <Link
+                  to={`/checkout?code=${record.tracking_code}`}
+                  className="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
+                >
+                  Accept Payment
+                </Link>
+                <Link
+                  to={`/checkout?code=${record.tracking_code}&action=cancel`}
+                  className="inline-flex items-center justify-center rounded-lg bg-red-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-700"
+                >
+                  Cancel / Dispute
+                </Link>
               </div>
             </div>
           </div>
@@ -134,4 +171,34 @@ export default function Track() {
       </div>
     </div>
   )
+}
+
+function ReceiptRow({ label, value, strong, last }) {
+  return (
+    <div className={`flex items-center justify-between gap-4 py-3.5 text-sm sm:text-base ${last ? '' : 'border-b border-slate-200'}`}>
+      <span className="text-slate-500">{label}</span>
+      <span className={strong ? 'text-right font-bold text-slate-900' : 'text-right text-slate-900'}>{value}</span>
+    </div>
+  )
+}
+
+function formatDate(value) {
+  return new Date(value).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+function formatTime(value) {
+  return new Date(value).toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  })
+}
+
+function formatPaymentMode(value) {
+  return value?.replaceAll('_', ' ').replace(/\b\w/g, (character) => character.toUpperCase()) || 'Not provided'
 }
