@@ -244,7 +244,7 @@ export default function Register() {
               id="paymentMode"
               type="text"
               className={`input-base ${errors.paymentMode ? 'input-error' : ''}`}
-              placeholder="e.g. Bank transfer"
+              placeholder="e.g. Bank transfer, Cash App, or PayPal"
               value={form.paymentMode}
               onChange={handleChange('paymentMode')}
             />

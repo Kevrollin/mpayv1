@@ -13,15 +13,16 @@ create table if not exists public.payment_requests (
   account_number text not null,
   amount         numeric(18, 2) not null check (amount > 0),
   currency       text not null,
-  payment_mode   text not null check (
-    payment_mode in ('bank_transfer', 'card', 'crypto_wallet', 'mobile_money')
-  ),
+  payment_mode   text not null,
   tracking_code  text not null unique,
   status         text not null default 'pending' check (
     status in ('pending', 'completed', 'failed', 'canceled')
   ),
   created_at     timestamptz not null default now()
 );
+
+alter table public.payment_requests
+  drop constraint if exists payment_requests_payment_mode_check;
 
 create index if not exists payment_requests_tracking_code_idx
   on public.payment_requests (tracking_code);
