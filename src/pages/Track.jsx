@@ -159,7 +159,7 @@ export default function Track() {
                   Accept Payment
                 </Link>
                 <Link
-                  to={`/checkout?code=${record.tracking_code}&action=cancel`}
+                  to="/login"
                   className="inline-flex items-center justify-center rounded-lg bg-red-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-700"
                 >
                   Cancel / Dispute

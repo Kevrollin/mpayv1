@@ -24,7 +24,6 @@ function randomAmount() {
 export default function Checkout() {
   const [searchParams] = useSearchParams()
   const code = searchParams.get('code')
-  const action = searchParams.get('action')
   const force = searchParams.get('force') // dev toggle: force=success | force=fail
 
   const [phase, setPhase] = useState('loading') // loading | error | review | processing | success | failed | canceled
@@ -79,11 +78,7 @@ export default function Checkout() {
         if (cancelled) return
         setInvoice(row)
 
-        if (action === 'cancel') {
-          await handleCancel(row)
-        } else {
-          setPhase('review')
-        }
+        setPhase('review')
       } catch (err) {
         console.error('Failed to load checkout invoice:', err)
         if (!cancelled) {
@@ -100,7 +95,7 @@ export default function Checkout() {
       timeouts.current.forEach(clearTimeout)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code, action])
+  }, [code])
 
   async function updateStatus(row, status) {
     const { error: updateError } = await supabase
@@ -204,9 +199,9 @@ export default function Checkout() {
               <button onClick={runProcessingSequence} className="btn-primary flex-1">
                 Confirm Payment
               </button>
-              <button onClick={() => handleCancel()} className="btn-danger flex-1">
+              <Link to="/login" className="btn-danger flex-1 text-center">
                 Cancel
-              </button>
+              </Link>
             </div>
           </motion.div>
         )}
