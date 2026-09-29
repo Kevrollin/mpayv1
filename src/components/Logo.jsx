@@ -4,7 +4,7 @@ import { useTheme } from '../context/ThemeContext'
 // (light vs dark) combination. We just pick the right file and drop it in
 // an <img> tag; no SVG markup lives in this component.
 const SOURCES = {
-  icon: { dark: '/download.svg', light: '/download (1).svg' },
+  icon: { dark: '/logo-icon-dark.svg', light: '/logo-icon-light.svg' },
   full: { dark: '/logo-full-dark.svg', light: '/logo-full-light.svg' },
 }
 
@@ -18,7 +18,7 @@ export default function Logo({ size = 'md', showText = true, className = '' }) {
 
   return (
     <div className={`flex items-center ${className}`}>
-      <img src={src} alt="KM Pay" className={`${heightClass} w-auto`} />
+      <img src={src} alt="Bitwire" className={`${heightClass} w-auto`} />
     </div>
   )
 }

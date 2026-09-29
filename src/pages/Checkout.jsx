@@ -182,7 +182,7 @@ export default function Checkout() {
             <p className="mt-1 text-sm text-muted">Confirm the details before you pay.</p>
 
             <div className="mt-6 space-y-3 rounded-lg border border-line bg-surface-2 p-4 text-sm">
-              <Row label="Merchant" value="KM Pay Merchant" />
+              <Row label="Merchant" value="Bitwire Merchant" />
               <Row label="Tracking code" value={invoice.tracking_code} mono />
               <Row label="Account holder" value={invoice.account_name} />
               <Row label="Payment mode" value={invoice.payment_mode?.replaceAll('_', ' ')} capitalize />

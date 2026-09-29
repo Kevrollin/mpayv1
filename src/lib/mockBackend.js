@@ -29,7 +29,7 @@ function writeJSON(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value))
   } catch (err) {
-    console.error(`[KM Pay] Failed to write to localStorage (${key}):`, err)
+    console.error(`[Bitwire] Failed to write to localStorage (${key}):`, err)
     throw new Error(
       'Local storage is unavailable or full in this browser, so this demo data could not be saved.'
     )

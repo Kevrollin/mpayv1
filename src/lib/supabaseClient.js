@@ -14,7 +14,7 @@ export const isMockMode = !isSupabaseConfigured
 
 if (isMockMode) {
   console.info(
-    '[KM Pay] Running in local mock mode (no Supabase env vars found). ' +
+    '[Bitwire] Running in local mock mode (no Supabase env vars found). ' +
       'Data is stored in this browser only. See src/lib/mockBackend.js.'
   )
 }

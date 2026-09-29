@@ -53,7 +53,7 @@ export default function Landing() {
               Payments, <span className="text-brand">handled simply.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-base text-muted sm:text-lg">
-              KM Pay lets you register a payment, track it by a unique code, and complete
+              Bitwire lets you register a payment, track it by a unique code, and complete
               checkout — all in one clean, fast flow.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">

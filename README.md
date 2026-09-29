@@ -1,4 +1,4 @@
-# KM Pay
+# Bitwire
 
 > Personal practice project — not a live payment processor, not for public
 > or production use. Every "transaction" is a row in a Postgres table (or,
